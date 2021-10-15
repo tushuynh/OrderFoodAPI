@@ -273,8 +273,8 @@ router.delete('/employees/:id', (req, res) => {
 
 
 // -------------------------------------------------------------------------- Nghiệp vụ -----------------------------------------------
-// Lấy thông tin khách hàng theo user_name, password
-router.post('/getCustomer', (req, res) => {
+// Check login for Customer
+router.post('/loginCustomer', (req, res) => {
     const { email, password } = req.body;
     customerSchema
     .findOne({
@@ -284,6 +284,30 @@ router.post('/getCustomer', (req, res) => {
     .then((data) => res.json(data))
     .catch((error) => res.json( {message: error}));
 });
+
+// Check login for Store
+router.post('/loginStore', (req, res) => {
+    const { email, password } = req.body;
+    storeSchema
+    .findOne({
+        'contact.email': email,
+        'contact.password': password
+    })
+    .then((data) => res.json(data))
+    .catch((error) => res.json( {message: error}));
+})
+
+// Check login for Employee
+router.post('/loginEmployee', (req, res) => {
+    const { email, password } = req.body;
+    employeeSchema
+    .findOne({
+        email: email,
+        password: password
+    })
+    .then((data) => res.json(data))
+    .catch((error) => res.json( {message: error}));
+})
 
 // Lấy thông tin tất cả cửa hàng yêu thích của khách hàng
 router.post('/getFavoriteStoresOfCustomer', (req, res) => {
