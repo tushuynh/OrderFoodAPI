@@ -5,7 +5,9 @@ const couponSchema = require('./models/coupon');
 const storeSchema = require('./models/store');
 const orderSchema = require('./models/order');
 const employeeSchema = require('./models/employee');
+const jwt = require('jsonwebtoken');
 const router = express.Router();
+const signature = 'deliveryfood';
 
 router.get('/', (req, res) => {
     res.send('Welcome to Order Food API');
@@ -272,7 +274,7 @@ router.delete('/employees/:id', (req, res) => {
 });
 
 
-// -------------------------------------------------------------------------- Nghiệp vụ -----------------------------------------------
+// ------------------------------------------------------------- Customer --------------------------------------------------------------
 // Check login for Customer
 router.post('/loginCustomer', (req, res) => {
     const { email, password } = req.body;
@@ -284,30 +286,6 @@ router.post('/loginCustomer', (req, res) => {
     .then((data) => res.json(data))
     .catch((error) => res.json( {message: error}));
 });
-
-// Check login for Store
-router.post('/loginStore', (req, res) => {
-    const { email, password } = req.body;
-    storeSchema
-    .findOne({
-        'contact.email': email,
-        'contact.password': password
-    })
-    .then((data) => res.json(data))
-    .catch((error) => res.json( {message: error}));
-})
-
-// Check login for Employee
-router.post('/loginEmployee', (req, res) => {
-    const { email, password } = req.body;
-    employeeSchema
-    .findOne({
-        email: email,
-        password: password
-    })
-    .then((data) => res.json(data))
-    .catch((error) => res.json( {message: error}));
-})
 
 // Lấy thông tin tất cả cửa hàng yêu thích của khách hàng
 router.post('/getFavoriteStoresOfCustomer', (req, res) => {
@@ -331,6 +309,56 @@ router.get('/getOrdersOfCustomer/:customer_id', (req, res) => {
     .catch((error) => res.json( {message: error}));
 });
 
+// ------------------------------------------------------------------- Admin -------------------------------------------------------------
+// Token có thời gian hết hạn: 1 ngày
+router.post(`/auth/sign-in`, (req, res) => {
+    const { email, password} = req.body;
+
+    employeeSchema
+    .findOne({
+        email: email,
+        password: password
+    })
+    .then(data => {
+        var token = jwt.sign({
+            _id: data.id,
+            role: 'admin'
+        }, signature, {
+            expiresIn: 86400
+        });
+        res.json(token);
+    })
+    .catch(error => res.json( {message: error}));
+});
+
+router.get(`/auth/sign-in/:token`, (req, res) => {
+    try {
+        const token = req.params.token;
+        const result = jwt.verify(token, signature);
+        if (result)
+            return res.json(true);
+    } catch (error) {
+        return res.json(false);
+    }
+});
+
+router.post(`/auth/sign-up`, (req, res) => {
+    
+});
+
+// ------------------------------------------------------------------- Store -------------------------------------------------------------
+// Check login for Store
+router.post('/loginStore', (req, res) => {
+    const { email, password } = req.body;
+    storeSchema
+    .findOne({
+        'contact.email': email,
+        'contact.password': password
+    })
+    .then((data) => res.json(data))
+    .catch((error) => res.json( {message: error}));
+})
+
 // Lấy tất cả thông tin hoá đơn của cửa hàng
 router.get('/getOrdersOfStore/:store_id', (req, res) => {
     const { store_id } = req.params;
@@ -341,24 +369,5 @@ router.get('/getOrdersOfStore/:store_id', (req, res) => {
     .then((data) => res.json(data))
     .catch((error) => res.json( {message: error}));
 });
-
-// ------------------------------------------------------------ AUTHENTICATION ------------------------------------------------
-// Đây là khu vực sẽ làm về phần đăng nhập cho web admin.
-
-// Route đăng nhập này cần trả về token.
-// Token có thể là một chuỗi ngẫu nhiên.
-// Cần phải lưu token này vào database.
-// Token sẽ có thời gian hết hạn.
-// Cần phải có hàm hẹn giờ để xóa token khỏi database.
-// 
-router.post(`/auth/sign-in`, (req, res) => {
-    console.log(req.body);
-    res.json({token: "123423412"})
-})
-
-router.delete(`/auth/logout`, (req, res) => {
-    console.log(req.body);
-    res.json({message: "Token is successfully deleted"})
-})
 
 module.exports = router;
