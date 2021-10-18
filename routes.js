@@ -276,6 +276,7 @@ router.delete('/employees/:id', (req, res) => {
 
 // ------------------------------------------------------------- Customer --------------------------------------------------------------
 // Check login for Customer
+// Token có thời gian hết hạn: 1 ngày
 router.post('/loginCustomer', (req, res) => {
     const { email, password } = req.body;
     customerSchema
@@ -287,8 +288,39 @@ router.post('/loginCustomer', (req, res) => {
     .catch((error) => res.json( {message: error}));
 });
 
+// Check login for Customer with token
+router.post('/customer/sign-in', (req, res) => {
+    const { email, password } = req.body;
+    customerSchema
+    .findOne({
+        email: email,
+        password: password
+    })
+    .then(data => {
+        res.json(jwt.sign({
+            _id: data.id,
+            role: 'customer'
+        }, signature, { expiresIn: 86400 }))
+    })
+    .catch(() => res.json( {message: 'email or password invalid'}));
+});
+
+// Check token
+router.get(`/customer/sign-in/:token`, (req, res) => {
+    try {
+        const token = req.params.token;
+        const result = jwt.verify(token, signature);
+        if (result.role == 'customer')
+            return res.json(true);
+        else
+            return res.json(false);
+    } catch (error) {
+        return res.json(false);
+    }
+});
+
 // Lấy thông tin tất cả cửa hàng yêu thích của khách hàng
-router.post('/getFavoriteStoresOfCustomer', (req, res) => {
+router.post('/customer/getFavoriteStores', (req, res) => {
     const { love_store_ids } = req.body;
     storeSchema
     .find({
@@ -299,7 +331,7 @@ router.post('/getFavoriteStoresOfCustomer', (req, res) => {
 });
 
 // Lấy thông tin tất cả hoá đơn của khách hàng
-router.get('/getOrdersOfCustomer/:customer_id', (req, res) => {
+router.get('/customer/getOrders/:customer_id', (req, res) => {
     const { customer_id } = req.params;
     orderSchema
     .find({
@@ -310,8 +342,9 @@ router.get('/getOrdersOfCustomer/:customer_id', (req, res) => {
 });
 
 // ------------------------------------------------------------------- Admin -------------------------------------------------------------
+// Check login admin with token
 // Token có thời gian hết hạn: 1 ngày
-router.post(`/auth/sign-in`, (req, res) => {
+router.post(`/admin/sign-in`, (req, res) => {
     const { email, password} = req.body;
 
     employeeSchema
@@ -320,47 +353,67 @@ router.post(`/auth/sign-in`, (req, res) => {
         password: password
     })
     .then(data => {
-        var token = jwt.sign({
+        res.json(jwt.sign({
             _id: data.id,
             role: 'admin'
-        }, signature, {
-            expiresIn: 86400
-        });
-        res.json(token);
+        }, signature, { expiresIn: 86400 }))
     })
-    .catch(error => res.json( {message: error}));
+    .catch(() => res.json( {message: 'email or password invalid'}))
 });
 
-router.get(`/auth/sign-in/:token`, (req, res) => {
+// Check token
+router.get(`/admin/sign-in/:token`, (req, res) => {
     try {
         const token = req.params.token;
         const result = jwt.verify(token, signature);
-        if (result)
+        if (result.role == 'admin')
             return res.json(true);
+        else
+            return res.json(false);
     } catch (error) {
         return res.json(false);
     }
 });
 
-router.post(`/auth/sign-up`, (req, res) => {
+router.post(`/admin/sign-up`, (req, res) => {
     
 });
 
 // ------------------------------------------------------------------- Store -------------------------------------------------------------
-// Check login for Store
-router.post('/loginStore', (req, res) => {
+// Check login for Store with token
+// Token có thời gian hết hạn: 1 ngày
+router.post('/store/sign-in', (req, res) => {
     const { email, password } = req.body;
     storeSchema
     .findOne({
         'contact.email': email,
         'contact.password': password
     })
-    .then((data) => res.json(data))
-    .catch((error) => res.json( {message: error}));
+    .then(data => {
+        res.json(jwt.sign({
+            _id: data.id,
+            role: 'store'
+        }, signature, { expiresIn: 86400 }))
+    })
+    .catch(() => res.json( {message: 'email or password invalid'}));
 })
 
+// Check token
+router.get(`/store/sign-in/:token`, (req, res) => {
+    try {
+        const token = req.params.token;
+        const result = jwt.verify(token, signature);
+        if (result.role == 'store')
+            return res.json(true);
+        else
+            return res.json(false);
+    } catch (error) {
+        return res.json(false);
+    }
+});
+
 // Lấy tất cả thông tin hoá đơn của cửa hàng
-router.get('/getOrdersOfStore/:store_id', (req, res) => {
+router.get('/store/getOrders/:store_id', (req, res) => {
     const { store_id } = req.params;
     orderSchema
     .find({
