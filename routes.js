@@ -6,6 +6,7 @@ const storeSchema = require('./models/store');
 const orderSchema = require('./models/order');
 const employeeSchema = require('./models/employee');
 const jwt = require('jsonwebtoken');
+const store = require('./models/store');
 const router = express.Router();
 const signature = 'deliveryfood';
 
@@ -276,7 +277,6 @@ router.delete('/employees/:id', (req, res) => {
 
 // ------------------------------------------------------------- Customer --------------------------------------------------------------
 // Check login for Customer
-// Token có thời gian hết hạn: 1 ngày
 router.post('/loginCustomer', (req, res) => {
     const { email, password } = req.body;
     customerSchema
@@ -289,6 +289,7 @@ router.post('/loginCustomer', (req, res) => {
 });
 
 // Check login for Customer with token
+// Token có thời gian hết hạn: 1 ngày
 router.post('/customer/sign-in', (req, res) => {
     const { email, password } = req.body;
     customerSchema
@@ -340,6 +341,45 @@ router.get('/customer/getOrders/:customer_id', (req, res) => {
     .then((data) => res.json(data))
     .catch((error) => res.json( {message: error}));
 });
+
+// Tìm kiếm theo tên món ăn
+router.get('/customer/searchFood/:text', (req, res) => {
+    const { text } = req.params;
+    storeSchema
+    .find()
+    .then(data => {
+        data.forEach(store => {
+            store.Foods.forEach(foodID => {
+                foodSchema
+                .findById(foodID)
+                .then(data => {
+                    if (data.name == text)
+                        res.json(store)
+                })
+                .catch(error => res.json( {message: error}))
+            })
+        })
+    })
+    .catch(error => res.json( {message: error}))
+});
+
+// Cập nhật đánh giá của khách hàng với cửa hàng
+router.post('/customer/reviewStore', (req, res) => {
+    const { storeID, customer_id, rate} = req.body;
+    storeSchema
+    .updateOne({
+        'reviews.customer_id': { '$ne': customer_id}
+    }, {
+        $push: {
+            reviews: {
+                customer_id: customer_id,
+                rate: rate
+            }
+        }
+    })
+    .then(data => res.json(data))
+    .catch(error => res.json( {message: error}))
+})
 
 // ------------------------------------------------------------------- Admin -------------------------------------------------------------
 // Check login admin with token
