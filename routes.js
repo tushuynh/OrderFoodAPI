@@ -345,22 +345,23 @@ router.get('/customer/getOrders/:customer_id', (req, res) => {
 // Tìm kiếm theo tên món ăn
 router.get('/customer/searchFood/:text', (req, res) => {
     const { text } = req.params;
-    storeSchema
-    .find()
-    .then(data => {
-        data.forEach(store => {
-            store.Foods.forEach(foodID => {
-                foodSchema
-                .findById(foodID)
-                .then(data => {
-                    if (data.name == text)
-                        res.json(store)
-                })
-                .catch(error => res.json( {message: error}))
-            })
-        })
+    var foodIDs = [];
+    foodSchema
+    .find({
+        name: { $regex: text, $options: 'i'}
     })
-    .catch(error => res.json( {message: error}))
+    .select('_id')
+    .then(data => {
+        data.forEach(x => {
+            foodIDs.push(x.id)
+        })
+        console.log(foodIDs)
+        storeSchema
+        .find({
+            Foods: { $in: foodIDs}
+        })
+        .then(data => res.json(data))
+    })
 });
 
 // Cập nhật đánh giá của khách hàng với cửa hàng
