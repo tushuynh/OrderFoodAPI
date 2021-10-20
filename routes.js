@@ -368,6 +368,7 @@ router.post('/customer/reviewStore', (req, res) => {
     const { storeID, customer_id, rate} = req.body;
     storeSchema
     .updateOne({
+        _id: storeID,
         'reviews.customer_id': { '$ne': customer_id}
     }, {
         $push: {
