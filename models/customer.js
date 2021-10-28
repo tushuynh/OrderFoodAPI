@@ -1,17 +1,22 @@
 const mongoose = require('mongoose');
 
+const reqSring = {
+    type: String,
+    default: ""
+}
+
 const customerSchema = mongoose.Schema({
-    name: String,
-    password: String,
-    avatar: String,
+    name: reqSring,
+    password: reqSring,
+    avatar: reqSring,
     love_store_ids: [],
-    phone: String,
-    email: String,
+    phone: reqSring,
+    email: reqSring,
     address: {
-        street: String,
-        ward: String,
-        district: String,
-        city: String
+        street: reqSring,
+        ward: reqSring,
+        district: reqSring,
+        city: reqSring
     }
 });
 

@@ -1,17 +1,29 @@
 const mongoose = require('mongoose');
 const coupon = require('./coupon');
 
+const reqSring = {
+    type: String,
+    default: ""
+}
+const reqNumber = {
+    type: Number,
+    default: 0
+}
+
 const orderSchema = mongoose.Schema({
-    date: Date,
-    store_id: String,
-    customer_id: String,
-    coupon_id: String,
-    total_money: Number,
-    status: String,
+    date: {
+        type: Date,
+        default: Date.now
+    },
+    store_id: reqSring,
+    customer_id: reqSring,
+    coupon_id: reqSring,
+    total_money: reqNumber,
+    status: reqSring,
     food_orders: [{
-        food_id: String,
-        quantity: Number,
-        price: Number
+        food_id: reqSring,
+        quantity: reqNumber,
+        price: reqNumber
     }]
 });
 

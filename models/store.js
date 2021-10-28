@@ -1,27 +1,35 @@
 const mongoose = require('mongoose');
 
+const reqSring = {
+    type: String,
+    default: ""
+}
+
 const storeSchema = mongoose.Schema({
-    name: String,
-    status: String,
+    name: reqSring,
+    status: reqSring,
     Foods: [],
-    image: String,
+    image: reqSring,
     reviews: [{
-        customer_id: String,
-        rate: Number
+        customer_id: reqSring,
+        rate: {
+            type: Number,
+            default: 0
+        }
     }],
     contact: {
-        phone: String,
-        email: String,
-        password: String,
+        phone: reqSring,
+        email: reqSring,
+        password: reqSring,
         address: {
-            street: String,
-            ward: String,
-            district: String,
-            city: String,
+            street: reqSring,
+            ward: reqSring,
+            district: reqSring,
+            city: reqSring,
             activity: [{
-                day: String,
-                open: String,
-                close: String
+                day: reqSring,
+                open: reqSring,
+                close: reqSring
             }]
         }
     }
