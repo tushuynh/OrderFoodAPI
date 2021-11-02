@@ -10,6 +10,10 @@ const employeeSchema = mongoose.Schema({
     email: reqSring,
     password: reqSring,
     phone: reqSring
-});
+},
+{
+    timestamps: true
+}
+);
 
 module.exports = mongoose.model('Employee', employeeSchema);

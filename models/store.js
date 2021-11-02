@@ -33,6 +33,9 @@ const storeSchema = mongoose.Schema({
             }]
         }
     }
+},
+{
+    timestamps: true
 });
 
 module.exports = mongoose.model('Store', storeSchema);

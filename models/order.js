@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const coupon = require('./coupon');
 
 const reqSring = {
     type: String,
@@ -11,10 +10,6 @@ const reqNumber = {
 }
 
 const orderSchema = mongoose.Schema({
-    date: {
-        type: Date,
-        default: Date.now
-    },
     store_id: reqSring,
     customer_id: reqSring,
     coupon_id: reqSring,
@@ -25,6 +20,10 @@ const orderSchema = mongoose.Schema({
         quantity: reqNumber,
         price: reqNumber
     }]
-});
+},
+{
+    timestamps: true
+}
+);
 
 module.exports = mongoose.model('Order', orderSchema);

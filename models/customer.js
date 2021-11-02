@@ -18,6 +18,9 @@ const customerSchema = mongoose.Schema({
         district: reqSring,
         city: reqSring
     }
+}, 
+{
+    timestamps: true
 });
 
 module.exports = mongoose.model('Customer', customerSchema);
