@@ -423,6 +423,55 @@ router.post(`/admin/sign-in`, (req, res) => {
     .catch(() => res.json( {message: 'email or password invalid'}))
 });
 
+router.post(`/auth/sign-in`, (req, res) => {
+    const { email, password, isAdmin } = req.body;
+    console.log(req.body);
+  
+    if (isAdmin) {
+      employeeSchema
+        .findOne({
+          email: email,
+          password: password,
+        })
+        .then((data) => {
+          const token = jwt.sign(
+            {
+              _id: data.id,
+              name: data.name,
+              email: data.email,
+              role: "admin",
+            },
+            signature,
+            { expiresIn: 86400 }
+          );
+  
+          res.json({ token });
+        })
+        .catch(() => res.json({ message: "email or password invalid" }));
+    } else {
+      storeSchema
+        .findOne({
+          email: email,
+          password: password,
+        })
+        .then((data) => {
+          const token = jwt.sign(
+            {
+              _id: data.id,
+              name: data.name,
+              email: data.email,
+              role: "customer",
+            },
+            signature,
+            { expiresIn: 86400 }
+          );
+  
+          res.json({ token });
+        })
+        .catch(() => res.json({ message: "email or password invalid" }));
+    }
+  });
+
 // Check token
 router.get(`/admin/sign-in/:token`, (req, res) => {
     try {
@@ -632,10 +681,5 @@ router.get('/store/getOrdersLastYear/:store_id', (req, res) => {
     .then(data => res.json(data))
     .catch(error => res.json( {message: error}))
 })
-
-
-
-
-
 
 module.exports = router;
