@@ -6,7 +6,8 @@ const storeSchema = require('./models/store');
 const orderSchema = require('./models/order');
 const employeeSchema = require('./models/employee');
 const jwt = require('jsonwebtoken');
-const store = require('./models/store');
+const moment = require('moment');
+const { response } = require('express');
 const router = express.Router();
 const signature = 'deliveryfood';
 
@@ -406,23 +407,6 @@ router.get('/customer/searchByCategory/:category', (req, res) => {
 // ------------------------------------------------------------------- Admin -------------------------------------------------------------
 // Check login admin with token
 // Token có thời gian hết hạn: 1 ngày
-router.post(`/admin/sign-in`, (req, res) => {
-    const { email, password} = req.body;
-
-    employeeSchema
-    .findOne({
-        email: email,
-        password: password
-    })
-    .then(data => {
-        res.json(jwt.sign({
-            _id: data.id,
-            role: 'admin'
-        }, signature, { expiresIn: 86400 }))
-    })
-    .catch(() => res.json( {message: 'email or password invalid'}))
-});
-
 router.post(`/auth/sign-in`, (req, res) => {
     const { email, password, isAdmin } = req.body;
     console.log(req.body);
@@ -460,7 +444,7 @@ router.post(`/auth/sign-in`, (req, res) => {
               _id: data.id,
               name: data.name,
               email: data.email,
-              role: "customer",
+              role: "store",
             },
             signature,
             { expiresIn: 86400 }
@@ -488,11 +472,19 @@ router.get(`/admin/sign-in/:token`, (req, res) => {
 
 // Get all orders in current date
 router.get('/admin/getOrdersCurrentDate', (req, res) => {
-    var d = new Date();
-    var date = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
     orderSchema
     .find({
-        createdAt: {$gte: date}
+        createdAt: {$gte: moment().startOf('date')}
+    })
+    .then(data => res.json(data))
+    .catch(error => res.json( {message: error}))
+})
+
+// Get all orders in current week
+router.get('/admin/getOrdersCurrentWeek', (req, res) => {
+    orderSchema
+    .find({
+        createdAt: {$gte: moment().startOf('isoWeek'), $lte: moment().endOf('isoWeek')}
     })
     .then(data => res.json(data))
     .catch(error => res.json( {message: error}))
@@ -500,13 +492,9 @@ router.get('/admin/getOrdersCurrentDate', (req, res) => {
 
 // Get all orders in current month
 router.get('/admin/getOrdersCurrentMonth', (req, res) => {
-    var d = new Date();
-    var minMonth = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + '1';
-    var maxMonth = d.getFullYear() + '-' + (d.getMonth() + 2) + '-' + '1';
-
     orderSchema
     .find({
-        createdAt: {$gte: minMonth, $lt: maxMonth}
+        createdAt: {$gte: moment().startOf('month'), $lte: moment().endOf('month')}
     })
     .then(data => res.json(data))
     .catch(error => res.json( {message: error}))
@@ -514,74 +502,56 @@ router.get('/admin/getOrdersCurrentMonth', (req, res) => {
 
 // Get all orders in current year
 router.get('/admin/getOrdersCurrentYear', (req, res) => {
-    var d = new Date();
-    var minMonth = d.getFullYear() + '-1-1';
-    var maxMonth = (d.getFullYear() + 1) + '-1-1';
     orderSchema
     .find({
-        createdAt: {$gte: minMonth, $lt: maxMonth}
+        createdAt: {$gte: moment().startOf('year'), $lte: moment().endOf('year')}
     })
     .then(data => res.json(data))
     .catch(error => res.json( {message: error}))
 });
 
-// Get all order in last month
+// Get all orders in last week
+router.get('/admin/getOrdersLastWeek', (req, res) => {
+    orderSchema
+    .find({
+        createdAt: {$gte: moment().startOf('isoWeek').subtract(7, 'd'), $lt: moment().startOf('isoWeek')}
+    })
+    .then(data => res.json(data))
+    .catch(error => res.json( {message: error}))
+})
+
+// Get all orders in last month
 router.get('/admin/getOrdersLastMonth', (req, res) => {
-    var d = new Date();
-    var minMonth = d.getFullYear() + '-' + d.getMonth() + '-1';
-    var maxMonth = d.getFullYear() + '-' + (d.getMonth() + 1) + '-1';
     orderSchema
     .find({
-        createdAt: {$gte: minMonth, $lt: maxMonth}
+        createdAt: {$gte: moment().startOf('month').subtract(1, 'M'), $lt: moment().startOf('month')}
     })
     .then(data => res.json(data))
     .catch(error => res.json( {message: error}))
 })
 
-// Get all order in last year
+// Get all orders in last year
 router.get('/admin/getOrdersLastYear', (req, res) => {
-    var d = new Date();
-    var minYear = (d.getFullYear() - 1) + '-1-1';
-    var maxYear = d.getFullYear() + '-1-1';
-    console.log("", minYear, maxYear);
     orderSchema
     .find({
-        createdAt: {$gte: minYear, $lt: maxYear}
+        createdAt: {$gte: moment().startOf('year').subtract(1, 'y'), $lt: moment().startOf('year')}
     })
     .then(data => res.json(data))
     .catch(error => res.json( {message: error}))
 })
 
+// Get all new customers current date
 router.get('/admin/getNewCustomersCurrentDate', (req, res) => {
-    var d = new Date();
-    var date = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
     customerSchema
     .find({
-        createdAt: {$gte: date}
+        createdAt: {$gte: moment().startOf('date')}
     })
     .then(data => res.json(data))
     .catch(error => res.json( {message: error}))
 })
 
-// ------------------------------------------------------------------- Store -------------------------------------------------------------
-// Check login for Store with token
-// Token có thời gian hết hạn: 1 ngày
-router.post('/store/sign-in', (req, res) => {
-    const { email, password } = req.body;
-    storeSchema
-    .findOne({
-        'contact.email': email,
-        'contact.password': password
-    })
-    .then(data => {
-        res.json(jwt.sign({
-            _id: data.id,
-            role: 'store'
-        }, signature, { expiresIn: 86400 }))
-    })
-    .catch(() => res.json( {message: 'email or password invalid'}));
-})
 
+// ------------------------------------------------------------------- Store -------------------------------------------------------------
 // Check token
 router.get(`/store/sign-in/:token`, (req, res) => {
     try {
@@ -607,16 +577,37 @@ router.get('/store/getOrders/:store_id', (req, res) => {
     .catch((error) => res.json( {message: error}));
 });
 
-// Get all orders of store in current month
-router.get('/store/getOrdersCurrentMonth/:store_id', (req, res) => {
+// Get all orders of store in current date
+router.get('/store/getOrdersCurrentDate/:store_id', (req, res) => {
     const { store_id} = req.params;
-    var d = new Date();
-    var minMonth = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + '1';
-    var maxMonth = d.getFullYear() + '-' + (d.getMonth() + 2) + '-' + '1';
     orderSchema
     .find({
         store_id: store_id,
-        createdAt: {$gte: minMonth, $lt: maxMonth}
+        createdAt: {$gte: moment().startOf('date')}
+    })
+    .then(data => res.json(data))
+    .catch(error => res.json( {message: error}))
+})
+
+// Get all orders of store in current week
+router.get('/store/getOrdersCurrentWeek/:store_id', (req, res) => {
+    const { store_id} = req.params;
+    orderSchema
+    .find({
+        store_id: store_id,
+        createdAt: {$gte: moment().startOf('isoWeek'), $lte: moment().endOf('isoWeek')}
+    })
+    .then(data => res.json(data))
+    .catch(error => res.json( {message: error}))
+})
+
+// Get all orders of store in current month
+router.get('/store/getOrdersCurrentMonth/:store_id', (req, res) => {
+    const { store_id} = req.params;
+    orderSchema
+    .find({
+        store_id: store_id,
+        createdAt: {$gte: moment().startOf('month'), $lte: moment().endOf('month')}
     })
     .then(data => res.json(data))
     .catch(error => res.json( {message: error}))
@@ -625,27 +616,22 @@ router.get('/store/getOrdersCurrentMonth/:store_id', (req, res) => {
 // Get all orders of store in current year
 router.get('/store/getOrdersCurrentYear/:store_id', (req, res) => {
     const { store_id} = req.params;
-    var d = new Date();
-    var minMonth = d.getFullYear() + '-1-1';
-    var maxMonth = (d.getFullYear() + 1) + '-1-1';
     orderSchema
     .find({
         store_id: store_id,
-        createdAt: {$gte: minMonth, $lt: maxMonth}
+        createdAt: {$gte: moment().startOf('year'), $lte: moment().endOf('year')}
     })
     .then(data => res.json(data))
     .catch(error => res.json( {message: error}))
 });
 
-// Get all orders of store in current date
-router.get('/store/getOrdersCurrentDate/:store_id', (req, res) => {
+// Get all orders of store in last week
+router.get('/store/getOrdersLastWeek/:store_id', (req, res) => {
     const { store_id} = req.params;
-    var d = new Date();
-    var date = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
     orderSchema
     .find({
         store_id: store_id,
-        createdAt: {$gte: date}
+        createdAt: {$gte: moment().startOf('isoWeek').subtract(7, 'd'), $lt: moment().startOf('isoWeek')}
     })
     .then(data => res.json(data))
     .catch(error => res.json( {message: error}))
@@ -654,13 +640,10 @@ router.get('/store/getOrdersCurrentDate/:store_id', (req, res) => {
 // Get all order of store in last month
 router.get('/store/getOrdersLastMonth/:store_id', (req, res) => {
     const { store_id} = req.params;
-    var d = new Date();
-    var minMonth = d.getFullYear() + '-' + d.getMonth() + '-1';
-    var maxMonth = d.getFullYear() + '-' + (d.getMonth() + 1) + '-1';
     orderSchema
     .find({
         store_id: store_id,
-        createdAt: {$gte: minMonth, $lt: maxMonth}
+        createdAt: {$gte: moment().startOf('month').subtract(1, 'M'), $lt: moment().startOf('month')}
     })
     .then(data => res.json(data))
     .catch(error => res.json( {message: error}))
@@ -669,14 +652,10 @@ router.get('/store/getOrdersLastMonth/:store_id', (req, res) => {
 // Get all order in last year
 router.get('/store/getOrdersLastYear/:store_id', (req, res) => {
     const { store_id} = req.params;
-    var d = new Date();
-    var minYear = (d.getFullYear() - 1) + '-1-1';
-    var maxYear = d.getFullYear() + '-1-1';
-    console.log("", minYear, maxYear);
     orderSchema
     .find({
         store_id: store_id,
-        createdAt: {$gte: minYear, $lt: maxYear}
+        createdAt: {$gte: moment().startOf('year').subtract(1, 'y'), $lt: moment().startOf('year')}
     })
     .then(data => res.json(data))
     .catch(error => res.json( {message: error}))
