@@ -1,6 +1,9 @@
 const cors = require('cors');
 const express = require('express');
-const router = require('./routes');
+const basicRouter = require('./routes/basicRouter');
+const customerRouter = require('./routes/customerRouter');
+const adminRouter = require('./routes/adminRouter');
+const storeRouter = require('./routes/storeRouter');
 const mongoose = require('mongoose');
 const app = express();
 
@@ -8,7 +11,10 @@ const MongoDB_Path = "mongodb+srv://admin:deliveryfood@orderfood.cs59v.mongodb.n
 
 app.use(cors());
 app.use(express.json());
-app.use("/api", router);
+app.use("/api", basicRouter);
+app.use("/api", customerRouter);
+app.use("/api", adminRouter);
+app.use("/api", storeRouter);
 
 mongoose
     .connect(MongoDB_Path)
