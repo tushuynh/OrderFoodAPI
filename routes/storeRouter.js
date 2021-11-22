@@ -120,7 +120,7 @@ router.get('/store/getOrdersLastYear/:store_id', (req, res) => {
 })
 
 // udpate delivered order
-router.post('/store/updateDelivered', (req, res) => {
+router.post('/store/updateOrderDelivered', (req, res) => {
     const { store_id} = req.body;
 
     firebase.initializeApp({
@@ -129,8 +129,8 @@ router.post('/store/updateDelivered', (req, res) => {
 
     const payload = {
         notification: {
-            title: '',
-            body: '',
+            title: 'Order Delivered',
+            body: 'Successfully delivered to you',
             click_action: 'FLUTTER_NOTIFICATION_CLICK'
         },
         data: {
