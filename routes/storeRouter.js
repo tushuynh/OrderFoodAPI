@@ -2,6 +2,8 @@ const express = require('express');
 const orderSchema = require('../models/order');
 const jwt = require('jsonwebtoken');
 const moment = require('moment');
+const firebase = require('firebase-admin');
+const serviceAccount = require('../privateKey.json')
 const router = express.Router();
 const signature = 'deliveryfood';
 
@@ -115,5 +117,8 @@ router.get('/store/getOrdersLastYear/:store_id', (req, res) => {
     .then(data => res.json(data))
     .catch(error => res.json( {message: error}))
 })
+
+
+router.post('/store/')
 
 module.exports = router;
