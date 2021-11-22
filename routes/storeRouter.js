@@ -6,6 +6,7 @@ const firebase = require('firebase-admin');
 const serviceAccount = require('../privateKey.json')
 const router = express.Router();
 const signature = 'deliveryfood';
+require('dotenv').config();
 
 
 // ------------------------------------------------------------------- Store -------------------------------------------------------------
@@ -118,7 +119,28 @@ router.get('/store/getOrdersLastYear/:store_id', (req, res) => {
     .catch(error => res.json( {message: error}))
 })
 
+// udpate delivered order
+router.post('/store/updateDelivered', (req, res) => {
+    const { store_id} = req.body;
 
-router.post('/store/')
+    firebase.initializeApp({
+        credential: firebase.credential.cert(serviceAccount)
+    });
+
+    const payload = {
+        notification: {
+            title: '',
+            body: '',
+            click_action: 'FLUTTER_NOTIFICATION_CLICK'
+        },
+        data: {
+            store_id: store_id
+        }
+    };
+
+    const options = { priority: 'high', timeToLive: 60 * 60 * 24 };
+
+    firebase.messaging().sendToDevice(process.env.FIREBASE_TOKEN, payload, options);
+});
 
 module.exports = router;
