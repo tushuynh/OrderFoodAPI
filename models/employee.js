@@ -1,15 +1,15 @@
 const mongoose = require('mongoose');
 
-const reqSring = {
+const reqString = {
     type: String,
     default: ""
 }
 
 const employeeSchema = mongoose.Schema({
-    name: reqSring,
-    email: reqSring,
-    password: reqSring,
-    phone: reqSring
+    name: reqString,
+    email: reqString,
+    password: reqString,
+    phone: reqString
 },
 {
     timestamps: true

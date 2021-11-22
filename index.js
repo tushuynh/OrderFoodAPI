@@ -7,8 +7,6 @@ const storeRouter = require('./routes/storeRouter');
 const mongoose = require('mongoose');
 const app = express();
 
-const MongoDB_Path = "mongodb+srv://admin:deliveryfood@orderfood.cs59v.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
-
 app.use(cors());
 app.use(express.json());
 app.use("/api", basicRouter);
@@ -17,7 +15,7 @@ app.use("/api", adminRouter);
 app.use("/api", storeRouter);
 
 mongoose
-    .connect(MongoDB_Path)
+    .connect(process.env.MongoDB_Path)
     .then(() => console.log('Connected to MongoDB Atlas'))
     .catch((error) => console.error(error));
 

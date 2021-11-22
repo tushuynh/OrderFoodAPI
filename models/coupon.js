@@ -1,12 +1,12 @@
 const mongoose = require('mongoose');
 
-const reqSring = {
+const reqString = {
     type: String,
     default: ""
 }
 
 const couponSchema = mongoose.Schema({
-    code: reqSring,
+    code: reqString,
     discount: {
         type: Number,
         default: 0
@@ -15,7 +15,7 @@ const couponSchema = mongoose.Schema({
         type: Date,
         default: Date.now
     },
-    status: reqSring
+    status: reqString
 });
 
 module.exports = mongoose.model('Coupon', couponSchema);

@@ -1,19 +1,19 @@
 const mongoose = require('mongoose');
 
-const reqSring = {
+const reqString = {
     type: String,
     default: ""
 }
 
 const foodSchema = mongoose.Schema({
-    name: reqSring,
+    name: reqString,
     price: {
         type: Number,
         default: 0
     },
-    type_of_food: reqSring,
-    status: reqSring,
-    image: reqSring
+    type_of_food: reqString,
+    status: reqString,
+    image: reqString
 });
 
 module.exports = mongoose.model('Food', foodSchema);

@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const reqSring = {
+const reqString = {
     type: String,
     default: ""
 }
@@ -10,13 +10,13 @@ const reqNumber = {
 }
 
 const orderSchema = mongoose.Schema({
-    store_id: reqSring,
-    customer_id: reqSring,
-    coupon_id: reqSring,
+    store_id: reqString,
+    customer_id: reqString,
+    coupon_id: reqString,
     total_money: reqNumber,
-    status: reqSring,
+    status: reqString,
     food_orders: [{
-        food_id: reqSring,
+        food_id: reqString,
         quantity: reqNumber,
         price: reqNumber
     }]

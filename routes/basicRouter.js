@@ -8,7 +8,7 @@ const employeeSchema = require('../models/employee');
 const router = express.Router();
 
 router.get('/', (req, res) => {
-    res.send('Welcome to Order Food API');
+    res.send('Welcome to Paella Delivery API');
 });
 
 

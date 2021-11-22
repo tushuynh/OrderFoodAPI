@@ -4,11 +4,13 @@ const foodSchema = require('../models/food');
 const storeSchema = require('../models/store');
 const orderSchema = require('../models/order');
 const jwt = require('jsonwebtoken');
+const {google} = require('googleapis');
+const nodemailer = require('nodemailer');
+require('dotenv').config();
 const moment = require('moment');
 const router = express.Router();
+
 const signature = 'deliveryfood';
-
-
 // ------------------------------------------------------------- Customer --------------------------------------------------------------
 // Check login for Customer
 router.post('/loginCustomer', (req, res) => {
@@ -148,5 +150,69 @@ router.post('/customer/filterOrdersDayToDay', (req, res) => {
     .then(data => res.json(data))
     .catch(error => res.json( {message: error}));
 });
+
+// send email code for forgot password
+router.post('/customer/forgotPassword', (req, res) => {
+    const { email } = req.body;
+    const code = (Math.random() * (999999 - 100000) + 100000).toFixed(0);
+
+    customerSchema
+    .findOneAndUpdate({email: email}, { $set: { code}})
+    .then(async data => {
+        if (data == null)
+        {
+            return res.json({ message: 'There is no customer with this email address'});
+        }
+        
+        const CLIENT_ID = process.env.CLIENT_ID;
+        const CLIENT_SECRET = process.env.CLIENT_SECRET;
+        const REDIRECT_URI = process.env.REDIRECT_URI;
+        const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
+        
+        const oAuth2Client = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI);
+        oAuth2Client.setCredentials({refresh_token: REFRESH_TOKEN});
+
+        try {
+            const accessToken = await oAuth2Client.getAccessToken();
+            const transport = nodemailer.createTransport({
+                service: 'Gmail',
+                auth: {
+                    type: 'OAuth2',
+                    user: 'paella.delivery.food@gmail.com',
+                    clientId: CLIENT_ID,
+                    clientSecret: CLIENT_SECRET,
+                    refreshToken: REFRESH_TOKEN,
+                    accessToken: accessToken
+                }
+            })
+
+            // send mail with defined transport object
+            let info = await transport.sendMail({
+                from: '"Paella Delivery" <paella.delivery.food@example.com>', // sender address
+                to: email, // list of receivers
+                subject: "Forgot password Account", // Subject line
+                text: "Your code: " + code, // plain text body
+                html: "<h2>Forgot password Paella Account<h2><b>Your code: " + code + "<b>", // html body
+            });
+
+            res.json(info);
+        } catch (error) {
+            res.json(error);
+        }
+    })
+    .catch(error => res.json({ message: error}));
+})
+
+// check code confirm reset password
+router.post('/customer/checkCodeResetPassword', (req, res) => {
+    const { code, id} = req.body;
+
+})
+
+// reset password
+router.post('/customer/resetPassword', (req, res) => {
+    const { id, password} = req.body;
+    
+})
 
 module.exports = router;
