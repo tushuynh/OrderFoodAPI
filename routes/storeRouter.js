@@ -123,6 +123,11 @@ router.get('/store/getOrdersLastYear/:store_id', (req, res) => {
 router.post('/store/updateOrderDelivered', (req, res) => {
     const { store_id} = req.body;
 
+    orderSchema
+    .findOneAndUpdate({ _id: store_id}, { status: 'Đã giao'})
+    .then(data => res.json({ message: 'Updated the order to delivered'}))
+    .catch(error => res.json({ message: error}))
+
     firebase.initializeApp({
         credential: firebase.credential.cert(serviceAccount)
     });
