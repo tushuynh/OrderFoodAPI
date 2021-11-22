@@ -16,7 +16,7 @@ app.use("/api", adminRouter);
 app.use("/api", storeRouter);
 
 mongoose
-    .connect(process.env.MongoDB_Path)
+    .connect(process.env.MONGODB_PATH)
     .then(() => console.log('Connected to MongoDB Atlas'))
     .catch((error) => console.error(error));
 
