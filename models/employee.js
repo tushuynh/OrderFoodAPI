@@ -7,7 +7,11 @@ const reqString = {
 
 const employeeSchema = mongoose.Schema({
     name: reqString,
-    email: reqString,
+    email: {
+        type: String,
+        default: "",
+        unique: true
+    },
     password: reqString,
     phone: reqString
 },

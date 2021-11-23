@@ -190,12 +190,12 @@ router.post('/customer/forgotPassword', (req, res) => {
             let info = await transport.sendMail({
                 from: '"Paella Delivery" <paella.delivery.food@example.com>', // sender address
                 to: email, // list of receivers
-                subject: "Forgot password Account", // Subject line
+                subject: "Forgot password", // Subject line
                 text: "Your code: " + code, // plain text body
                 html: "<h2>Forgot password Paella Account<h2><b>Your code: " + code + "<b>", // html body
             });
 
-            res.json(info);
+            res.json({ message: 'We have sent a code to your email address'});
         } catch (error) {
             res.json(error);
         }
@@ -204,15 +204,31 @@ router.post('/customer/forgotPassword', (req, res) => {
 })
 
 // check code confirm reset password
-router.post('/customer/checkCodeResetPassword', (req, res) => {
-    const { code, id} = req.body;
+router.post('/customer/checkVerificationCode', (req, res) => {
+    const { code, customer_id} = req.body;
 
-})
+    customerSchema
+    .findOne({
+        _id: customer_id,
+        code: code
+    })
+    .then(data => res.json(data == null ? false : true))
+    .catch(error => res.json({ message: error}));
+});
 
 // reset password
 router.post('/customer/resetPassword', (req, res) => {
-    const { id, password} = req.body;
+    const { customer_id, password} = req.body;
     
-})
+    customerSchema
+    .findOneAndUpdate({ _id: customer_id}, { password: password})
+    .then(data => {
+        if (data)
+            res.json({ message: "Password has been successfully updated"});
+        else
+            res.json({ message: "There is no customer with this id address"})
+    })
+    .catch(error => res.json({ message: error}));
+});
 
 module.exports = router;

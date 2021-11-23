@@ -6,7 +6,11 @@ const reqString = {
 }
 
 const couponSchema = mongoose.Schema({
-    code: reqString,
+    code: {
+        type: String,
+        default: "",
+        unique: true
+    },
     discount: {
         type: Number,
         default: 0
