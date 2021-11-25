@@ -139,6 +139,15 @@ router.get('/customer/searchByCategory/:category', (req, res) => {
     })
 });
 
+// Search by high rated
+router.get('/customer/searchByNewest', (req, res) => {
+    storeSchema
+    .find()
+    .sort({'createdAt': -1})
+    .then(data => res.json(data))
+    .catch(error => res.json({ message: error}));
+});
+
 // filter orders by day to day
 router.post('/customer/filterOrdersDayToDay', (req, res) => {
     const { customer_id, startDay, endDay} = req.body;
