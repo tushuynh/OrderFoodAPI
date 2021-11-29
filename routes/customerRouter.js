@@ -214,11 +214,11 @@ router.post('/customer/forgotPassword', (req, res) => {
 
 // check code confirm reset password
 router.post('/customer/checkVerificationCode', (req, res) => {
-    const { code, customer_id} = req.body;
+    const { code, email} = req.body;
 
     customerSchema
     .findOne({
-        _id: customer_id,
+        email: email,
         code: code
     })
     .then(data => res.json(data == null ? false : true))
@@ -227,10 +227,10 @@ router.post('/customer/checkVerificationCode', (req, res) => {
 
 // reset password
 router.post('/customer/resetPassword', (req, res) => {
-    const { customer_id, password} = req.body;
+    const { email, password} = req.body;
     
     customerSchema
-    .findOneAndUpdate({ _id: customer_id}, { password: password})
+    .findOneAndUpdate({ email: email}, { password: password})
     .then(data => {
         if (data)
             res.json({ message: "Password has been successfully updated"});
