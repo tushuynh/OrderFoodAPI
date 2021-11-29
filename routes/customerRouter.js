@@ -240,4 +240,16 @@ router.post('/customer/resetPassword', (req, res) => {
     .catch(error => res.json({ message: error}));
 });
 
+// Get reviews of store
+router.get('/customer/getReviewsOfStore/:store_id', (req, res) => {
+    const { store_id} = req.params;
+
+    storeSchema
+    .findOne({
+        _id: store_id
+    })
+    .then(data => res.json(data.reviews))
+    .catch(error => res.json({ message: error}))
+})
+
 module.exports = router;
