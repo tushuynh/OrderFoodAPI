@@ -10,7 +10,7 @@ const router = express.Router();
 const signature = 'deliveryfood';
 
 // ------------------------------------------------------------------- Admin -------------------------------------------------------------
-// Check login admin with token
+// Check login admin or store with token
 // Token có thời gian hết hạn: 1 ngày
 router.post(`/auth/sign-in`, (req, res) => {
     const { email, password, isAdmin } = req.body;
