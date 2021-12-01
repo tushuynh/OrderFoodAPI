@@ -126,20 +126,11 @@ router.post('/foods', (req, res) => {
 router.post('/coupons', (req, res) => {
     const coupon = couponSchema(req.body);
 
-    // Update corect date because one day off
-    coupon.dateExpired = updateCorectDate(coupon.dateExpired);
-
     coupon
     .save()
     .then((data) => res.json(data))
     .catch((error) => res.json({ message: error}));
 });
-
-function updateCorectDate(date) {
-    let dateExpired = new Date(date);
-    dateExpired.setDate(dateExpired.getDate() + 1);
-    return dateExpired;
-}
 
 router.post('/stores', (req, res) => {
     const store = storeSchema(req.body);

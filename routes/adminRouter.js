@@ -5,6 +5,7 @@ const orderSchema = require('../models/order');
 const employeeSchema = require('../models/employee');
 const jwt = require('jsonwebtoken');
 const moment = require('moment');
+const customer = require('../models/customer');
 const router = express.Router();
 const signature = 'deliveryfood';
 
@@ -74,6 +75,7 @@ router.get(`/admin/sign-in/:token`, (req, res) => {
     }
 });
 
+// ------------------------------------------------------------ Orders ---------------------------------------------------------------
 // Get all orders in current date
 router.get('/admin/getOrdersCurrentDate', (req, res) => {
     orderSchema
@@ -144,6 +146,7 @@ router.get('/admin/getOrdersLastYear', (req, res) => {
     .catch(error => res.json( {message: error}))
 })
 
+// -------------------------------------------------------------- Customers ------------------------------------------------------------
 // Get all new customers current date
 router.get('/admin/getNewCustomersCurrentDate', (req, res) => {
     customerSchema
@@ -152,6 +155,97 @@ router.get('/admin/getNewCustomersCurrentDate', (req, res) => {
     })
     .then(data => res.json(data))
     .catch(error => res.json( {message: error}))
+})
+
+// Get all new customers current month
+router.get('/admin/getNewCustomersCurrentMonth', (req, res) => {
+  customerSchema
+  .find({
+    createdAt: {$gte: moment().startOf('month'), $lte: moment().endOf('month')}
+  })
+  .then(data => res.json(data))
+  .catch(error => res.json({ message: error}))
+})
+
+// Get all new customers current year
+router.get('/admin/getNewCustomersCurrentYear', (req, res) => {
+  customerSchema
+  .find({       
+    createdAt: {$gte: moment().startOf('year'), $lte: moment().endOf('year')}
+  })
+  .then(data => res.json(data))
+  .catch(error => res.json({ message: error}))
+})
+
+// Get all new customers last month
+router.get('/admin/getNewCustomersLastMonth', (req, res) => {
+  customerSchema
+  .find({
+    createdAt: {$gte: moment().startOf('month').subtract(1, 'M'), $lt: moment().startOf('month')}
+  })
+  .then(data => res.json(data))
+  .catch(error => res.json({ message: error}))
+})
+
+// Get all new customers last year
+router.get('/admin/getNewCustomersLastYear', (req, res) => {
+  customerSchema
+  .find({
+    createdAt: {$gte: moment().startOf('year').subtract(1, 'y'), $lt: moment().startOf('year')}
+  })
+  .then(data => res.json(data))
+  .catch(error => res.json({ message: error}))
+})
+
+// -------------------------------------------------------------- Stores --------------------------------------------------------
+// Get all new stores current date
+router.get('/admin/getNewStoresCurrentDate', (req, res) => {
+  storeSchema
+  .find({
+    createdAt: {$gte: moment().startOf('date')}
+  })
+  .then(data => res.json(data))
+  .catch(error => res.json({ message: error}))
+})
+
+// Get all new stores current month
+router.get('/admin/getNewStoresCurrentMonth', (req, res) => {
+  storeSchema
+  .find({
+    createdAt: {$gte: moment().startOf('month'), $lt: moment().endOf('month')}
+  })
+  .then(data => res.json(data))
+  .catch(error => res.json({ message: error}))
+})
+
+// Get all new stores current year
+router.get('/admin/getNewStoresCurrentYear', (req, res) => {
+  storeSchema
+  .find({
+    createdAt: {$gte: moment().startOf('year'), $lte: moment().endOf('year')}
+  })
+  .then(data => res.json(data))
+  .catch(error => res.json({ message: error}))
+})
+
+// Get all new stores last month
+router.get('/admin/getNewStoresLastMonth', (req, res) => {
+  storeSchema
+  .find({
+    createdAt: {$gte: moment().startOf('month').subtract(1, 'M'), $lt: moment().startOf('month')}
+  })
+  .then(data => res.json(data))
+  .catch(error => res.json({ message: error}))
+})
+
+// Get all new stores last year
+router.get('/admin/getNewStoresLastYear', (req, res) => {
+  storeSchema
+  .find({
+    createdAt: {$gte: moment().startOf('year').subtract(1, 'y'), $lt: moment().startOf('year')}
+  })
+  .then(data => res.json(data))
+  .catch(error => res.json({ message: error}))
 })
 
 // Get revenue by month of the year
@@ -172,5 +266,7 @@ router.get('/admin/revenueMonthOfYear', (req, res) => {
     })
     .catch(error => res.json( {message: error}))
 });
+
+
 
 module.exports = router;
