@@ -8,6 +8,7 @@ const {google} = require('googleapis');
 const nodemailer = require('nodemailer');
 require('dotenv').config();
 const moment = require('moment');
+const customer = require('../models/customer');
 const router = express.Router();
 
 const signature = 'deliveryfood';
@@ -102,20 +103,41 @@ router.get('/customer/searchFood/:text', (req, res) => {
 // Cập nhật đánh giá của khách hàng với cửa hàng
 router.post('/customer/reviewStore', (req, res) => {
     const { store_id, customer_id, rate} = req.body;
+
     storeSchema
-    .updateOne({
+    .findOne({
         _id: store_id,
-        'reviews.customer_id': { '$ne': customer_id}
-    }, {
-        $push: {
-            reviews: {
-                customer_id: customer_id,
-                rate: rate
-            }
+        'reviews.customer_id': customer_id
+    })
+    .then(data => {
+        if (data != null) {
+            storeSchema
+            .updateOne({
+                _id: store_id,
+                'reviews.customer_id': customer_id
+            }, {
+                $set: { 'reviews.$.rate': rate}
+            })
+            .then(data => res.json(data))
+            .catch(error => res.json({ message: error}))
+        }
+        else {
+            storeSchema
+            .updateOne({
+                _id: store_id
+            }, {
+                $push: {
+                    reviews: {
+                        customer_id: customer_id,
+                        rate: rate
+                    }
+                }
+            })
+            .then(data => res.json(data))
+            .catch(error => res.json({ message: error}))
         }
     })
-    .then(data => res.json(data))
-    .catch(error => res.json( {message: error}))
+    .catch(error => res.json({ message: error}))
 })
 
 // Search by category
