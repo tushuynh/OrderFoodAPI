@@ -22,58 +22,74 @@ router.post(`/auth/sign-in`, (req, res) => {
           email: email,
           password: password,
         })
-        .then((data) => {
-          const token = jwt.sign(
-            {
-              _id: data.id,
-              name: data.name,
-              email: data.email,
-              role: "admin",
-            },
-            signature,
-            { expiresIn: 86400 }
-          );
-  
-          res.json({ token });
+        .then(data => {
+          if (data == null)
+            return res.json({ message: "Email or password invalid"});
+          else {
+            const token = jwt.sign(
+              {
+                id: data.id,
+                role: "admin"
+              },
+              signature,
+              { expiresIn: 86400 }
+            );
+    
+            return res.json({ token });
+          }
         })
-        .catch(() => res.json({ message: "email or password invalid" }));
+        .catch(() => res.json({ message: "Email or password invalid" }));
     } else {
       storeSchema
         .findOne({
-          email: email,
-          password: password,
+          'contact.email': email,
+          'contact.password': password,
         })
-        .then((data) => {
-          const token = jwt.sign(
-            {
-              _id: data.id,
-              name: data.name,
-              email: data.email,
-              role: "store",
-            },
-            signature,
-            { expiresIn: 86400 }
-          );
-  
-          res.json({ token });
+        .then(data => {
+          if (data == null)
+            return res.json({ message: "Email or password invalid"});
+          else {
+            const token = jwt.sign(
+              {
+                id: data.id,
+                role: "store"
+              },
+              signature,
+              { expiresIn: 86400 }
+            );
+    
+            res.json({ token });
+          }
         })
-        .catch(() => res.json({ message: "email or password invalid" }));
+        .catch(() => res.json({ message: "Email or password invalid" }));
     }
   });
 
 // Check token
-router.get(`/admin/sign-in/:token`, (req, res) => {
+router.get('/admin/sign-in/:token', (req, res) => {
     try {
         const token = req.params.token;
         const result = jwt.verify(token, signature);
-        if (result.role == 'admin')
-            return res.json(true);
+        if (result.role == 'admin') {
+          employeeSchema
+          .findById(result.id)
+          .then(data => {
+            if (data == null)
+              return res.json({ message: false});
+            else
+              return res.json({ message: true, data: data});
+          })
+        }
         else
-            return res.json(false);
+            return res.json({ message: false});
     } catch (error) {
-        return res.json(false);
+        return res.json({ message: false});
     }
 });
+
+router.get('/auth/log-out', (req, res) => {
+  res.json("Done");
+})
 
 // ------------------------------------------------------------ Orders ---------------------------------------------------------------
 // Get all orders in current date

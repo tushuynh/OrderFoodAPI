@@ -1,5 +1,6 @@
 const express = require('express');
 const orderSchema = require('../models/order');
+const storeSchema = require('../models/store')
 const jwt = require('jsonwebtoken');
 const moment = require('moment');
 const firebase = require('firebase-admin');
@@ -15,12 +16,20 @@ router.get(`/store/sign-in/:token`, (req, res) => {
     try {
         const token = req.params.token;
         const result = jwt.verify(token, signature);
-        if (result.role == 'store')
-            return res.json(true);
+        if (result.role == 'store') {
+            storeSchema
+            .findById(result.id)
+            .then(data => {
+                if (data == null)
+                    return res.json({ message: false});
+                else
+                    return res.json({ message: true, data: data});
+            })
+        }
         else
-            return res.json(false);
+            return res.json({ message: false});
     } catch (error) {
-        return res.json(false);
+        return res.json({ message: false});
     }
 });
 
