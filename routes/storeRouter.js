@@ -132,8 +132,6 @@ router.get('/store/getOrdersLastYear/:store_id', (req, res) => {
 router.post('/store/updateOrderDelivered', (req, res) => {
     const { order_id} = req.body;
 
-    
-
     orderSchema
     .findOneAndUpdate({ _id: order_id}, { status: 'Đã giao'})
     .then(data => {
@@ -165,10 +163,6 @@ router.post('/store/updateOrderDelivered', (req, res) => {
         return res.json({ message: 'Updated the order to delivered'});
     })
     .catch(error => res.json({ message: error}))
-
-    
-
-    
 });
 
 module.exports = router;
