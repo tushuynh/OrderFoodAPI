@@ -130,31 +130,37 @@ router.get('/store/getOrdersLastYear/:store_id', (req, res) => {
 
 // udpate delivered order
 router.post('/store/updateOrderDelivered', (req, res) => {
-    const { store_id} = req.body;
+    const { order_id} = req.body;
 
     orderSchema
-    .findOneAndUpdate({ _id: store_id}, { status: 'Đã giao'})
-    .then(data => res.json({ message: 'Updated the order to delivered'}))
+    .findOneAndUpdate({ _id: order_id}, { status: 'Đã giao'})
+    .then(data => {
+        if (data == null)
+            return res.json({ message: "This order does not exist."});
+
+        firebase.initializeApp({
+            credential: firebase.credential.cert(serviceAccount)
+        });
+    
+        const payload = {
+            notification: {
+                title: 'Order Delivered',
+                body: 'Successfully delivered to you',
+                click_action: 'FLUTTER_NOTIFICATION_CLICK'
+            },
+            data: {
+                store_id: data.store_id,
+                customer_id: data.customer_id
+            }
+        };
+    
+        const options = { priority: 'high', timeToLive: 60 * 60 * 24 };
+    
+        firebase.messaging().sendToDevice(process.env.FCM_TOKEN, payload, options);
+
+        res.json({ message: 'Updated the order to delivered'})
+    })
     .catch(error => res.json({ message: error}))
-
-    firebase.initializeApp({
-        credential: firebase.credential.cert(serviceAccount)
-    });
-
-    const payload = {
-        notification: {
-            title: 'Order Delivered',
-            body: 'Successfully delivered to you',
-            click_action: 'FLUTTER_NOTIFICATION_CLICK'
-        },
-        data: {
-            store_id: store_id
-        }
-    };
-
-    const options = { priority: 'high', timeToLive: 60 * 60 * 24 };
-
-    firebase.messaging().sendToDevice(process.env.FIREBASE_TOKEN, payload, options);
 });
 
 module.exports = router;
