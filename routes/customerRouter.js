@@ -161,7 +161,7 @@ router.get('/customer/searchByCategory/:category', (req, res) => {
     })
 });
 
-// Search by high rated
+// Search by newest
 router.get('/customer/searchByNewest', (req, res) => {
     storeSchema
     .find()
