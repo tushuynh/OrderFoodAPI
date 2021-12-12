@@ -132,16 +132,20 @@ router.get('/store/getOrdersLastYear/:store_id', (req, res) => {
 router.post('/store/updateOrderDelivered', (req, res) => {
     const { order_id} = req.body;
 
+    
+
     orderSchema
     .findOneAndUpdate({ _id: order_id}, { status: 'Đã giao'})
     .then(data => {
         if (data == null)
-            return res.json({ message: "This order does not exist."});
+            return res.json({ message: "This order does not exist"});
 
-        firebase.initializeApp({
-            credential: firebase.credential.cert(serviceAccount)
-        });
-    
+        if (!firebase.apps.length) {
+            firebase.initializeApp({
+                credential: firebase.credential.cert(serviceAccount)
+            });
+        }
+
         const payload = {
             notification: {
                 title: 'Order Delivered',
@@ -158,9 +162,13 @@ router.post('/store/updateOrderDelivered', (req, res) => {
     
         firebase.messaging().sendToDevice(process.env.FCM_TOKEN, payload, options);
 
-        res.json({ message: 'Updated the order to delivered'})
+        return res.json({ message: 'Updated the order to delivered'});
     })
     .catch(error => res.json({ message: error}))
+
+    
+
+    
 });
 
 module.exports = router;
