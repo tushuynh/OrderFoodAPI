@@ -26,7 +26,7 @@ router.post('/loginCustomer', (req, res) => {
 });
 
 // Check login for Customer with token
-// Token có thời gian hết hạn: 1 ngày
+// Token có thời gian hết hạn: 1 tuần
 router.post('/customer/sign-in', (req, res) => {
     const { email, password } = req.body;
     customerSchema
@@ -38,7 +38,7 @@ router.post('/customer/sign-in', (req, res) => {
         res.json(jwt.sign({
             _id: data.id,
             role: 'customer'
-        }, signature, { expiresIn: 86400 }))
+        }, signature, { expiresIn: 7 * 86400 }))
     })
     .catch(() => res.json( {message: 'email or password invalid'}));
 });

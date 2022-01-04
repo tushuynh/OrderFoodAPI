@@ -112,7 +112,13 @@ router.post('/customers', (req, res) => {
     customer
     .save()
     .then((data) => res.json(data))
-    .catch((error) => res.json({ message: error}));
+    .catch((error) => {
+        if (error.name === "MongoServerError" && error.code === 11000) {
+            res.status(500).json({ message: "Email already exists"});
+        } else {
+            res.json({ message: error});
+        }
+    });
 });
 
 router.post('/foods', (req, res) => {
@@ -129,7 +135,13 @@ router.post('/coupons', (req, res) => {
     coupon
     .save()
     .then((data) => res.json(data))
-    .catch((error) => res.json({ message: error}));
+    .catch((error) => {
+        if (error.name === "MongoServerError" && error.code === 11000) {
+            res.status(500).json({ message: "Code already exists"});
+        } else {
+            res.json({ message: error});
+        }
+    });
 });
 
 router.post('/stores', (req, res) => {
@@ -153,7 +165,13 @@ router.post('/employees', (req, res) => {
     employee
     .save()
     .then((data) => res.json(data))
-    .catch((error) => res.json({ message: error}));
+    .catch((error) => {
+        if (error.name === "MongoServerError" && error.code === 11000) {
+            res.status(500).json({ message: "Email already exists"});
+        } else {
+            res.json({ message: error});
+        }
+    });
 });
 
 
@@ -164,7 +182,13 @@ router.put('/customers/:id', (req, res) => {
     customerSchema
     .updateOne({ _id: id}, { $set: { name, password, avartar, love_store_ids, phone, email, address}})
     .then((data) => res.json(data))
-    .catch((error) => res.json( { message: error}))
+    .catch((error) => {
+        if (error.name === "MongoServerError" && error.code === 11000) {
+            res.status(500).json({ message: "Email already exists"});
+        } else {
+            res.json({ message: error});
+        }
+    })
 });
 
 router.put('/foods/:id', (req, res) => {
@@ -182,7 +206,13 @@ router.put('/coupons/:id', (req, res) => {
     couponSchema
     .updateOne({ _id: id}, { $set: { code, discount, date_expired, status}})
     .then((data) => res.json(data))
-    .catch((error) => res.json( { message: error}))
+    .catch((error) => {
+        if (error.name === "MongoServerError" && error.code === 11000) {
+            res.status(500).json({ message: "Code already exists"});
+        } else {
+            res.json({ message: error});
+        }
+    })
 });
 
 router.put('/stores/:id', (req, res) => {
@@ -209,7 +239,13 @@ router.put('/employees/:id', (req, res) => {
     employeeSchema
     .updateOne({ _id: id}, { $set: { name, password, email, phone}})
     .then((data) => res.json(data))
-    .catch((error) => res.json( { message: error}))
+    .catch((error) => {
+        if (error.name === "MongoServerError" && error.code === 11000) {
+            res.status(500).json({ message: "Email already exists"});
+        } else {
+            res.json({ message: error});
+        }
+    });
 });
 
 
