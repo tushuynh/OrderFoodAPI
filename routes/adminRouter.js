@@ -124,7 +124,13 @@ router.post("/auth/sign-up", (req, res) => {
     store
     .save()
     .then((data) => res.json(data))
-    .catch((error) => res.json({ message: error}));
+    .catch((error) => {
+      if (error.name === "MongoServerError" && error.code === 11000) {
+        res.status(500).json({ message: "Email already exists"});
+      } else {
+        res.json({ message: error});
+      }
+    });
   }
 });
 

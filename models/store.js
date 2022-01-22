@@ -19,7 +19,11 @@ const storeSchema = mongoose.Schema({
     }],
     contact: {
         phone: reqString,
-        email: reqString,
+        email: {
+            type: String,
+            default: "",
+            unique: true
+        },
         password: reqString,
         address: {
             street: reqString,
