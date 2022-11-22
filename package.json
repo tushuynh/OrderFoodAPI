@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js"
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
   },
   "keywords": [],
   "author": "",
@@ -16,6 +16,7 @@
     "express": "^4.17.1",
     "firebase-admin": "^10.0.0",
     "googleapis": "^91.0.0",
+    "http-errors": "^2.0.0",
     "install": "^0.13.0",
     "jsonwebtoken": "^8.5.1",
     "moment": "^2.29.1",
@@ -23,6 +24,7 @@
     "nodemailer": "^6.7.1"
   },
   "devDependencies": {
+    "morgan": "^1.10.0",
     "nodemon": "^2.0.12"
   }
 }

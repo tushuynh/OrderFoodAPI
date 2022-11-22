@@ -8,7 +8,16 @@ const reqString = {
 const storeSchema = mongoose.Schema({
     name: reqString,
     status: reqString,
-    Foods: [],
+    Foods: [{
+        name: reqString,
+        price: {
+            type: Number,
+            default: 0
+        },
+        type_of_food: reqString,
+        status: reqString,
+        image: reqString
+    }],
     image: reqString,
     reviews: [{
         customer_id: reqString,
@@ -24,7 +33,11 @@ const storeSchema = mongoose.Schema({
             default: "",
             unique: true
         },
-        password: reqString,
+        password: {
+            type: String,
+            default: "",
+            select: false
+        },
         address: {
             street: reqString,
             ward: reqString,

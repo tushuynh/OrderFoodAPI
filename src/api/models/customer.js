@@ -7,7 +7,11 @@ const reqString = {
 
 const customerSchema = mongoose.Schema({
     name: reqString,
-    password: reqString,
+    password: {
+        type: String,
+        default: "",
+        select: false
+    },
     avatar: reqString,
     love_store_ids: [],
     phone: reqString,

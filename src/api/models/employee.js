@@ -12,12 +12,15 @@ const employeeSchema = mongoose.Schema({
         default: "",
         unique: true
     },
-    password: reqString,
+    password: {
+        type: String,
+        default: "",
+        select: false
+    },
     phone: reqString
 },
 {
     timestamps: true
-}
-);
+});
 
 module.exports = mongoose.model('Employee', employeeSchema);
