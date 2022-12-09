@@ -9,7 +9,7 @@ const customerSchema = mongoose.Schema({
     name: reqString,
     password: {
         type: String,
-        default: "",
+        required: true,
         select: false
     },
     avatar: reqString,
@@ -17,8 +17,8 @@ const customerSchema = mongoose.Schema({
     phone: reqString,
     email: {
         type: String,
-        default: "",
-        unique: true
+        unique: true,
+        required: true
     },
     address: {
         street: reqString,

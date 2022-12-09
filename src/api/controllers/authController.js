@@ -2,12 +2,18 @@ const customerSchema = require('../models/customer');
 const storeSchema = require('../models/store');
 const employeeSchema = require('../models/employee');
 const createError = require('http-errors')
-const { signAccessToken} = require('../helpers/jwtService')
+const { 
+    signAccessToken, 
+    signRefreshToken, 
+    verifyRefreshToken
+} = require('../helpers/jwtService')
 
 class AuthController {
 
     // -------------------------------------------------------------- [GET]
-    // /login { email, password, role}
+    // -------------------------------------------------------------- [POST]
+    // [POST] /login 
+    // Login for all accounts
     async login(req, res, next) {
         const { email, password, role } = req.body;
         if (!role) return next(createError(403, 'Role is required'))
@@ -30,16 +36,52 @@ class AuthController {
 
         if (!obj) return next(createError(401, 'Email or password is incorrect.'))
 
-        signAccessToken({ _id: obj._id, role})
-            .then(token => {
-                res.status(200).json({
-                    success: true,
-                    token
-                });
-            })
-            .catch(err => next(err))   
+        const accessToken = await signAccessToken({ _id: obj._id, role})
+        const refreshToken = await signRefreshToken({ _id: obj._id, role})
+        res.status(200).json({
+            success: true,
+            code: 200,
+            accessToken,
+            refreshToken
+        });
     }
-    // -------------------------------------------------------------- [POST]
+
+    // [POST] /registerCustomer
+    // Create a account for the customer
+    registerCustomer(req, res, next) {
+        const { email, password} = req.body
+        if (!email || !password) {
+            return next(createError(400, 'Email and password are required.'))
+        }
+        const customer = customerSchema(req.body)
+        customer.save()
+            .then(data => res.status(201).json(data))
+            .catch(error => {
+                if (error.name === 'MongoServerError' && error.code === 11000)
+                    return next(createError(400, 'Email is already in use'))
+                next(error)
+            })
+    }
+
+    // [POST] /refreshToken
+    // Verify a refresh token and return the access token
+    async getAccessToken(req, res, next) {
+        try {
+            const { refreshToken} = req.body
+            if (!refreshToken) {
+                return next(createError(400, 'Refresh token is required'))
+            }
+
+            const payload = await verifyRefreshToken(refreshToken)
+            const accessToken = await signAccessToken({
+                _id: payload._id,
+                role: payload.role
+            })
+            res.status(200).json({ accessToken})
+        } catch (error) {
+            next(error)
+        }
+    }
     // -------------------------------------------------------------- [PUT]
     // -------------------------------------------------------------- [DELETE]
 }
