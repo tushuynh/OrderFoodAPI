@@ -2,7 +2,6 @@ const customerSchema = require('../models/customer');
 const nodemailer = require('nodemailer');
 const moment = require('moment');
 const createError = require('http-errors');
-const { google } = require('googleapis');
 
 class CustomerController {
     // -------------------------------------------------------------- [GET]
@@ -104,7 +103,7 @@ class CustomerController {
 
         customerSchema
             .findOneAndUpdate({ email }, { $set: { code } })
-            .then(async (data) => {
+            .then((data) => {
                 if (data == null)
                     return next(
                         createError(
@@ -113,43 +112,35 @@ class CustomerController {
                         )
                     );
 
-                const CLIENT_ID = process.env.CLIENT_ID;
-                const CLIENT_SECRET = process.env.CLIENT_SECRET;
-                const REDIRECT_URI = process.env.REDIRECT_URI;
-                const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
-                const oAuth2Client = new google.auth.OAuth2(
-                    CLIENT_ID,
-                    CLIENT_SECRET,
-                    REDIRECT_URI
-                );
-                oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
-
-                const accessToken = await oAuth2Client.getAccessToken();
-                const transport = nodemailer.createTransport({
-                    service: 'Gmail',
+                const transporter = nodemailer.createTransport({
+                    host: 'smtp.gmail.com',
+                    port: 465,
+                    secure: true,
                     auth: {
-                        type: 'OAuth2',
-                        user: 'paella.delivery.food@gmail.com',
-                        clientId: CLIENT_ID,
-                        clientSecret: CLIENT_SECRET,
-                        refreshToken: REFRESH_TOKEN,
-                        accessToken: accessToken,
-                    },
+                        user: process.env.APP_EMAIL,
+                        pass: process.env.APP_PASSWORD
+                    }
                 });
 
-                // send mail with defined transport object
-                await transport.sendMail({
-                    from: '"Paella Delivery" <paella.delivery.food@example.com>', // sender address
-                    to: email, // list of receivers
-                    subject: 'Forgot password', // Subject line
-                    text: `Your code: ${code}`, // plain text body
-                    html: `<h2>Forgot password Paella Account<h2><b>Your code: ${code} </b>`,
-                });
+                const mailerOptions = {
+                    from: `Paella Delivery <${process.env.APP_EMAIL}>`,
+                    to: email,
+                    subject: 'Forgot password',
+                    text: `Your code: ${code}`,
+                    html: `<h2>Forgot password Paella Account<h2><b>Your code: ${code} </b>`
+                }
 
-                res.status(200).json({
-                    success: true,
-                    message: 'We have sent a code to your email address',
-                });
+                transporter.sendMail(mailerOptions, function (error, info) {
+                    if (error) {
+                        console.log(error)
+                        res.json(error)
+                    } else {
+                        res.status(200).json({
+                            success: true,
+                            message: 'We have sent a code to your email address.',
+                        });
+                    }
+                })
             })
             .catch((error) => next(error));
     }

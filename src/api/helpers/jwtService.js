@@ -32,7 +32,6 @@ const verifyAccessToken = (req, res, next) => {
             return next(createError(401, 'Unauthorized access token'))
         }
 
-        req.user = decode
         let permission
         switch(decode.role) {
             case 'customer':
@@ -53,6 +52,7 @@ const verifyAccessToken = (req, res, next) => {
                 next()
                 break
         }
+        req.user = decode
     })
 }
 
@@ -79,7 +79,25 @@ const verifyRefreshToken = async (refreshToken) => {
             resolve(decode)
         })
     })
-    
+}
+
+const verifyAccessTokenOrderRoute = async (req, res, next) => {
+    if (!req.headers.authorization) {
+        return next(createError(401, 'Unauthorized access token (Token must be supplied).'))
+    }
+
+    const authHeader = req.headers.authorization
+    const token = authHeader.split(' ')[1]
+    const accessKey = process.env.ACCESS_KEY
+
+    // Verify
+    jwt.verify(token, accessKey, (err, decode) => {
+        if (err) {
+            return next(createError(401, 'Unauthorized access token'))
+        }
+        req.user = decode
+        next()
+    })
 }
 
 
@@ -87,5 +105,6 @@ module.exports = {
     signAccessToken,
     verifyAccessToken,
     signRefreshToken,
-    verifyRefreshToken
+    verifyRefreshToken,
+    verifyAccessTokenOrderRoute
 }

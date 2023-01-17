@@ -1,23 +1,41 @@
 const express = require('express');
 const router = express.Router()
 const orderController = require('../controllers/orderController')
+const createError = require('http-errors')
 
 
-// ----------------------------------------------- [GET]
-// --------------------- Customer
-router.get('/customer/getOrders/:customer_id', orderController.getOrdersOfCustomer);
+// ------------------------------------------ Customer
+router.get('/getOrders/:customer_id', orderController.getOrdersOfCustomer);
+router.post('/filterOrdersDayToDay', orderController.filterOrdersDayToDay);
 
-// --------------------- Store
-router.get('/store/getOrders/:store_id', orderController.getOrderOfStore);
-router.get('/store/getOrdersCurrentDate/:store_id', orderController.getOrdersCurrentDateOfStore)
-router.get('/store/getOrdersCurrentWeek/:store_id', orderController.getOrdersCurrentWeekOfStore)
-router.get('/store/getOrdersCurrentMonth/:store_id', orderController.getOrdersCurrentMonthOfStore);
-router.get('/store/getOrdersCurrentYear/:store_id', orderController.getOrdersCurrentYearOfStore);
-router.get('/store/getOrdersLastWeek/:store_id', orderController.getOrdersLastWeekOfStore)
-router.get('/store/getOrdersLastMonth/:store_id', orderController.getOrdersLastMonthOfStore)
-router.get('/store/getOrdersLastYear/:store_id', orderController.getOrdersLastYearOfStore)
+// ------------------------------------------ Store
+router.use((req, res, next) => {
+    if (req.user.role === 'customer') {
+        return next(createError(403, 'Access to the requested resource is forbidden.'))
+    }
+    next()
+})
 
-// --------------------- Admin
+router.get('/getOrders/:store_id', orderController.getOrderOfStore);
+router.get('/getOrdersCurrentDate/:store_id', orderController.getOrdersCurrentDateOfStore)
+router.get('/getOrdersCurrentWeek/:store_id', orderController.getOrdersCurrentWeekOfStore)
+router.get('/getOrdersCurrentMonth/:store_id', orderController.getOrdersCurrentMonthOfStore);
+router.get('/getOrdersCurrentYear/:store_id', orderController.getOrdersCurrentYearOfStore);
+router.get('/getOrdersLastWeek/:store_id', orderController.getOrdersLastWeekOfStore)
+router.get('/getOrdersLastMonth/:store_id', orderController.getOrdersLastMonthOfStore)
+router.get('/getOrdersLastYear/:store_id', orderController.getOrdersLastYearOfStore)
+
+router.post('/', orderController.createOrder);
+
+router.put('/updateOrderDelivered/:_id', orderController.updateOrderDelivered);
+
+// ------------------------------------------ Admin
+router.use((req, res, next) => {
+    if (req.user.role !== 'employee') {
+        return next(createError(403, 'Access to the requested resource is forbidden.'))
+    }
+    next()
+})
 router.get("/getOrdersCurrentDate", orderController.getOrdersCurrentDate);
 router.get("/getOrdersCurrentWeek", orderController.getOrdersCurrentDate);
 router.get("/getOrdersCurrentMonth", orderController.getOrdersCurrentMonth);
@@ -29,15 +47,8 @@ router.get("/revenueMonthOfYear", orderController.getRevenueMonthOfYear);
 router.get('/:_id', orderController.getOrder);
 router.get('/', orderController.getOrders);
 
-// ----------------------------------------------- [POST]
-router.post('/filterOrdersDayToDay', orderController.filterOrdersDayToDay);
-router.post('/', orderController.createOrder);
-
-// ----------------------------------------------- [PUT]
-router.put('/store/updateOrderDelivered/:_id', orderController.updateOrderDelivered);
 router.put('/:_id', orderController.updateOrder);
 
-// ----------------------------------------------- [DELETE]
 router.delete('/:_id', orderController.deleteOrder);
 
 module.exports = router
